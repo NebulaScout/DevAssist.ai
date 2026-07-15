@@ -20,7 +20,7 @@ export async function POST(request: Request) {
   const { code } = body;
   try {
     const response = await client.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o", //TODO: change to 5.6 later
       messages: [{ role: "user", content: code }],
       max_tokens: 1024,
     });
