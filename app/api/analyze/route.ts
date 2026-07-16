@@ -1,49 +1,76 @@
-import OpenAI from "openai";
+import { z } from "zod";
 
-// const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
+import { runAgentPipeline } from "@/lib/agent-pipeline";
+
+const encoder = new TextEncoder();
+
+const analyzeRequestSchema = z.object({
+  input: z
+    .string()
+    .refine((value) => value.trim().length > 0, "Input must not be empty"),
+  mode: z.enum(["error", "config", "log"]),
+});
 
 export async function POST(request: Request) {
-  // const apiKey = process.env.OPENAI_API_KEY;
-  const client = new OpenAI({
-    apiKey: process.env["OPENAI_API_KEY"], // This is the default and can be omitted
-  });
-
-  if (!client.apiKey) {
+  if (!process.env["OPENAI_API_KEY"]) {
     return Response.json(
       { error: "OPENAI_API_KEY is not configured" },
       { status: 500 },
     );
   }
 
-  const body = await request.json();
+  let body: unknown;
 
-  const { code } = body;
   try {
-    const response = await client.chat.completions.create({
-      model: "gpt-4o",
-      messages: [{ role: "user", content: code }],
-      max_tokens: 1024,
-    });
-
-    if (!response || !response.choices) {
-      return Response.json(
-        { error: "No response from OpenAI" },
-        { status: 500 },
-      );
-    }
-
-    return Response.json({ analysis: response.choices[0].message.content });
-  } catch (error) {
+    body = await request.json();
+  } catch {
     return Response.json(
-      { error: "OpenAI request failed", details: error },
-      { status: 500 },
+      { error: "Request body must be valid JSON" },
+      { status: 400 },
     );
   }
+
+  const parsedRequest = analyzeRequestSchema.safeParse(body);
+
+  if (!parsedRequest.success) {
+    return Response.json(
+      {
+        error: "Invalid analysis request",
+        details: z.treeifyError(parsedRequest.error),
+      },
+      { status: 400 },
+    );
+  }
+
+  const stream = new ReadableStream({
+    async start(controller) {
+      const send = (event: string, data: unknown) => {
+        controller.enqueue(
+          encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`),
+        );
+      };
+
+      try {
+        const result = await runAgentPipeline(parsedRequest.data.input, {
+          onStep: (status) => send("progress", { status }),
+        });
+
+        send("result", { mode: parsedRequest.data.mode, ...result });
+      } catch (error) {
+        console.error("Agent pipeline failed", error);
+        send("error", { error: "Unable to analyze input" });
+      } finally {
+        controller.close();
+      }
+    },
+  });
+
+  return new Response(stream, {
+    headers: {
+      "Cache-Control": "no-cache, no-transform",
+      Connection: "keep-alive",
+      "Content-Type": "text/event-stream; charset=utf-8",
+      "X-Accel-Buffering": "no",
+    },
+  });
 }
-//   return Response.json(
-//     { error: "OpenAI request failed", details: error },
-//     { status: response.status },
-//   );
-// }
-//   return Response.json({ message: "connected" });
-// }
