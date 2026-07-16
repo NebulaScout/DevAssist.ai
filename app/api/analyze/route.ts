@@ -12,9 +12,9 @@ const analyzeRequestSchema = z.object({
 });
 
 export async function POST(request: Request) {
-  if (!process.env["OPENAI_API_KEY"]) {
+  if (!process.env["OPENCODE_API_KEY"]) {
     return Response.json(
-      { error: "OPENAI_API_KEY is not configured" },
+      { error: "OPENCODE_API_KEY is not configured" },
       { status: 500 },
     );
   }
