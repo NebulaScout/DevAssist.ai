@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { runAgentPipeline } from "@/lib/agent-pipeline";
+import { getLlmConfiguration } from "@/lib/llm";
 
 const encoder = new TextEncoder();
 
@@ -12,9 +13,12 @@ const analyzeRequestSchema = z.object({
 });
 
 export async function POST(request: Request) {
-  if (!process.env["OPENAI_API_KEY"]) {
+  try {
+    getLlmConfiguration();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "AI is not configured";
     return Response.json(
-      { error: "OPENAI_API_KEY is not configured" },
+      { error: message },
       { status: 500 },
     );
   }
