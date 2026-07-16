@@ -1,6 +1,4 @@
-import OpenAI from "openai";
-import { zodTextFormat } from "openai/helpers/zod";
-
+import { generateStructuredOutput } from "@/lib/llm";
 import { analyzePrompt, explainPrompt, fixPrompt } from "@/lib/prompts";
 import {
   analysisSchema,
@@ -10,8 +8,6 @@ import {
   fixSchema,
   type Fix,
 } from "@/lib/types";
-
-export const AGENT_PIPELINE_MODEL = "";
 
 export type PipelineStep = "analyzing" | "generating_fix" | "explaining";
 
@@ -28,46 +24,31 @@ export type AgentPipelineOptions = {
 
 export async function runAgentPipeline(
   developerInput: string,
-  { model = AGENT_PIPELINE_MODEL, onStep }: AgentPipelineOptions = {},
+  { model, onStep }: AgentPipelineOptions = {},
 ): Promise<AgentPipelineResult> {
-  const client = new OpenAI({
-    apiKey: process.env["OPENCODE_API_KEY"],
-  });
-
   await onStep?.("analyzing");
-  const analysisResponse = await client.responses.parse({
-    model,
+  const analysis = await generateStructuredOutput({
     instructions: analyzePrompt,
     input: developerInput,
-    text: {
-      format: zodTextFormat(analysisSchema, "root_cause_analysis"),
-    },
+    model,
+    schema: analysisSchema,
   });
-  const analysis = analysisSchema.parse(analysisResponse.output_parsed);
 
   await onStep?.("generating_fix");
-  const fixResponse = await client.responses.parse({
-    model,
+  const fix = await generateStructuredOutput({
     instructions: fixPrompt,
     input: JSON.stringify({ developerInput, analysis }),
-    text: {
-      format: zodTextFormat(fixSchema, "generated_fix"),
-    },
+    model,
+    schema: fixSchema,
   });
-  const fix = fixSchema.parse(fixResponse.output_parsed);
 
   await onStep?.("explaining");
-  const explanationResponse = await client.responses.parse({
-    model,
+  const explanation = await generateStructuredOutput({
     instructions: explainPrompt,
     input: JSON.stringify({ analysis, fix }),
-    text: {
-      format: zodTextFormat(explanationSchema, "fix_explanation"),
-    },
+    model,
+    schema: explanationSchema,
   });
-  const explanation = explanationSchema.parse(
-    explanationResponse.output_parsed,
-  );
 
   return { analysis, fix, explanation };
 }
