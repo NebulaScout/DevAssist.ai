@@ -32,6 +32,13 @@ const steps: Array<{
   },
 ]
 
+const progressCopy: Record<AnalysisPipelineStatus, string> = {
+  analyzing: "Reading your input and isolating the likely root cause.",
+  generating_fix: "Drafting a focused, copy-ready fix.",
+  explaining: "Verifying the change and explaining why it works.",
+  complete: "Your diagnosis, fix, and explanation are ready.",
+}
+
 export function AnalysisPipeline({ status, className }: AnalysisPipelineProps) {
   if (!status) {
     return null
@@ -52,7 +59,7 @@ export function AnalysisPipeline({ status, className }: AnalysisPipelineProps) {
         <div>
           <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-blue-300">Agent workflow</p>
           <p className="mt-1 text-sm text-slate-300">
-            {status === "complete" ? "Analysis complete" : "Working through your input"}
+            {progressCopy[status]}
           </p>
         </div>
         {status !== "complete" && <LoaderCircle className="size-5 animate-spin text-blue-300" aria-hidden="true" />}

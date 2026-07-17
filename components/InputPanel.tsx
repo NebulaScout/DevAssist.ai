@@ -64,7 +64,7 @@ export function InputPanel({
           disabled={!input.trim() || isAnalyzing}
           className="flex h-10 items-center justify-center gap-2 rounded-lg bg-blue-500 px-5 text-sm font-medium text-white shadow-[0_8px_24px_rgba(37,99,235,0.22)] transition hover:bg-blue-400 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-500 disabled:shadow-none"
         >
-          {isAnalyzing ? "Analyzing…" : "Analyze"} <ArrowUpRight size={15} />
+          {isAnalyzing ? "Analyzing input…" : "Analyze"} <ArrowUpRight size={15} />
         </button>
       </div>
     </section>
