@@ -7,7 +7,6 @@ import {
   Check,
   ChevronDown,
   CircleHelp,
-  FileCode2,
   GitBranch,
   Layers3,
   Lightbulb,
@@ -15,12 +14,11 @@ import {
 } from "lucide-react"
 
 import { AnalysisPipeline, type AnalysisPipelineStatus } from "@/components/AnalysisPipeline"
+import { InputPanel, type InputMode } from "@/components/InputPanel"
 import { ResultsPanel } from "@/components/ResultsPanel"
 import { SampleCases } from "@/components/SampleCases"
 import type { SampleCase } from "@/lib/sample-data"
 import type { Analysis, Explanation, Fix } from "@/lib/types"
-
-type InputMode = "error" | "config"
 
 type AnalysisResult = {
   analysis: Analysis
@@ -184,52 +182,14 @@ export default function Home() {
         </div>
 
         <div className="mx-auto mt-12 max-w-4xl">
-          <div className="rounded-2xl border border-white/[0.1] bg-[#0e131d]/90 p-2 shadow-2xl shadow-black/20 backdrop-blur sm:p-3">
-            <div className="flex items-center justify-between border-b border-white/[0.07] px-3 pb-3 sm:px-4">
-              <div className="flex items-center gap-1 rounded-lg bg-white/[0.05] p-1 text-xs font-medium">
-                <button
-                  type="button"
-                  onClick={() => setMode("error")}
-                  aria-pressed={mode === "error"}
-                  className={`rounded-md px-3 py-1.5 transition ${mode === "error" ? "bg-white/[0.1] text-white shadow-sm" : "text-slate-500 hover:text-slate-300"}`}
-                >
-                  Error log
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setMode("config")}
-                  aria-pressed={mode === "config"}
-                  className={`rounded-md px-3 py-1.5 transition ${mode === "config" ? "bg-white/[0.1] text-white shadow-sm" : "text-slate-500 hover:text-slate-300"}`}
-                >
-                  Config
-                </button>
-              </div>
-            </div>
-
-            <textarea
-              value={input}
-              onChange={(event) => setInput(event.target.value)}
-              placeholder={mode === "error" ? "Paste your error or stack trace here..." : "Paste your config here..."}
-              aria-label="Error or configuration input"
-              disabled={isAnalyzing}
-              className="min-h-[210px] w-full resize-y bg-transparent px-3 py-5 font-mono text-[13px] leading-6 text-slate-300 outline-none placeholder:text-slate-600 disabled:cursor-not-allowed disabled:opacity-60 sm:px-4"
-              spellCheck={false}
-            />
-
-            <div className="flex flex-col gap-3 border-t border-white/[0.07] px-3 pt-3 sm:flex-row sm:items-center sm:justify-between sm:px-4">
-              <div className="flex items-center gap-2 text-[11px] text-slate-600">
-                <span className="flex items-center gap-1.5"><FileCode2 size={13} /> Supports logs, JSON, YAML &amp; code</span>
-              </div>
-              <button
-                type="button"
-                onClick={handleAnalyze}
-                disabled={!input.trim() || isAnalyzing}
-                className="flex h-10 items-center justify-center gap-2 rounded-lg bg-blue-500 px-5 text-sm font-medium text-white shadow-[0_8px_24px_rgba(37,99,235,0.22)] transition hover:bg-blue-400 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-500 disabled:shadow-none"
-              >
-                {isAnalyzing ? "Analyzing…" : "Analyze"} <ArrowUpRight size={15} />
-              </button>
-            </div>
-          </div>
+          <InputPanel
+            input={input}
+            isAnalyzing={isAnalyzing}
+            mode={mode}
+            onAnalyze={handleAnalyze}
+            onInputChange={setInput}
+            onModeChange={setMode}
+          />
 
           <SampleCases
             onSelect={handleSampleSelect}
