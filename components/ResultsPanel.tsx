@@ -2,6 +2,7 @@
 
 import { Braces, CircleHelp, FileCode2, Lightbulb } from "lucide-react"
 
+import { CodeDiffViewer } from "@/components/CodeDiffViewer"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import type { Analysis, Explanation, Fix } from "@/lib/types"
 
@@ -15,24 +16,6 @@ type ResultsPanelProps = {
 
 const tabClassName =
   "h-9 px-3 text-xs text-slate-400 data-active:bg-white/[0.1] data-active:text-white"
-
-function CodeBlock({ code, label, tone }: { code: string; label: string; tone: "before" | "after" }) {
-  const toneClasses =
-    tone === "before"
-      ? "border-rose-400/15 bg-rose-400/[0.04] text-rose-100"
-      : "border-emerald-400/15 bg-emerald-400/[0.04] text-emerald-100"
-
-  return (
-    <section className={`overflow-hidden rounded-xl border ${toneClasses}`}>
-      <p className="border-b border-inherit px-4 py-2 text-[11px] font-medium uppercase tracking-[0.16em] text-current/70">
-        {label}
-      </p>
-      <pre className="max-h-[420px] overflow-auto p-4 font-mono text-xs leading-6 whitespace-pre-wrap">
-        <code>{code}</code>
-      </pre>
-    </section>
-  )
-}
 
 export function ResultsPanel({ result }: ResultsPanelProps) {
   const { analysis, fix, explanation } = result
@@ -101,10 +84,7 @@ export function ResultsPanel({ result }: ResultsPanelProps) {
         </TabsContent>
 
         <TabsContent value="diff" className="pt-5">
-          <div className="grid gap-4 lg:grid-cols-2">
-            <CodeBlock code={fix.originalCode} label="Original" tone="before" />
-            <CodeBlock code={fix.fixedCode} label="Fixed" tone="after" />
-          </div>
+          <CodeDiffViewer original={fix.originalCode} fixed={fix.fixedCode} />
         </TabsContent>
 
         <TabsContent value="why-it-works" className="pt-5">
