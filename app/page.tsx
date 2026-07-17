@@ -252,13 +252,13 @@ export default function Home() {
 
       <section
         id="top"
-        className="relative mx-auto max-w-7xl px-5 pb-20 pt-16 lg:px-8 lg:pt-24"
+        className="relative mx-auto max-w-7xl px-5 pb-16 pt-12 sm:pt-16 lg:px-8 lg:pt-20"
       >
         <div className="mx-auto max-w-3xl text-center">
           <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-blue-400/20 bg-blue-400/[0.07] px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.16em] text-blue-300">
             <GitBranch size={13} /> Your AI pair programmer
           </div>
-          <h1 className="text-4xl font-semibold leading-[1.08] tracking-[-0.045em] text-white sm:text-6xl">
+          <h1 className="text-4xl font-semibold leading-[1.08] tracking-[-0.045em] text-white sm:text-5xl lg:text-6xl">
             Ship with confidence.
           </h1>
           <p className="mx-auto mt-5 max-w-xl text-[15px] leading-7 text-slate-400 sm:text-base">
@@ -267,21 +267,24 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="mx-auto mt-12 max-w-4xl">
-          <InputPanel
-            input={input}
-            isAnalyzing={isAnalyzing}
-            mode={mode}
-            onAnalyze={handleAnalyze}
-            onInputChange={setInput}
-            onModeChange={setMode}
-          />
+        <div className="mx-auto mt-10 max-w-5xl lg:mt-12">
+          <div className="grid gap-5 xl:grid-cols-[minmax(0,1.45fr)_minmax(280px,0.75fr)] xl:items-start">
+            <InputPanel
+              input={input}
+              isAnalyzing={isAnalyzing}
+              mode={mode}
+              onAnalyze={handleAnalyze}
+              onInputChange={setInput}
+              onModeChange={setMode}
+            />
 
-          <SampleCases
-            onSelect={handleSampleSelect}
-            disabled={isAnalyzing}
-            className="mt-5"
-          />
+            <SampleCases
+              onSelect={handleSampleSelect}
+              disabled={isAnalyzing}
+              className="rounded-2xl border border-white/[0.08] bg-white/[0.015] p-4"
+              compact
+            />
+          </div>
 
           <AnalysisPipeline status={status} className="mt-5" />
 
@@ -313,7 +316,7 @@ export default function Home() {
         </div>
 
         <section
-          className="mx-auto mt-20 max-w-4xl"
+          className="mx-auto mt-16 max-w-5xl lg:mt-20"
           aria-labelledby="results-heading"
         >
           <div className="mb-4 flex items-end justify-between">
