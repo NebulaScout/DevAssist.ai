@@ -12,11 +12,12 @@ import {
   Layers3,
   Lightbulb,
   Sparkles,
-  Terminal,
 } from "lucide-react"
 
 import { AnalysisPipeline, type AnalysisPipelineStatus } from "@/components/AnalysisPipeline"
 import { ResultsPanel } from "@/components/ResultsPanel"
+import { SampleCases } from "@/components/SampleCases"
+import type { SampleCase } from "@/lib/sample-data"
 import type { Analysis, Explanation, Fix } from "@/lib/types"
 
 type InputMode = "error" | "config"
@@ -26,13 +27,6 @@ type AnalysisResult = {
   fix: Fix
   explanation: Explanation
 }
-
-const sampleError = `Error: Cannot find module '@/lib/db'
-  at Module._resolveFilename (node:internal/modules/cjs/loader:1225:15)
-  at Module._load (node:internal/modules/cjs/loader:1056:27)
-
-Import trace:
-  ./app/api/users/route.ts`
 
 const workflow = [
   { icon: CircleHelp, label: "Analyze", detail: "Root cause & impact" },
@@ -58,6 +52,14 @@ export default function Home() {
   const [result, setResult] = useState<AnalysisResult | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isAnalyzing, setIsAnalyzing] = useState(false)
+
+  function handleSampleSelect(sampleCase: SampleCase) {
+    setInput(sampleCase.content)
+    setMode(sampleCase.type)
+    setStatus(null)
+    setResult(null)
+    setError(null)
+  }
 
   async function handleAnalyze() {
     if (!input.trim() || isAnalyzing) {
@@ -202,14 +204,6 @@ export default function Home() {
                   Config
                 </button>
               </div>
-              <button
-                type="button"
-                onClick={() => setInput(sampleError)}
-                disabled={isAnalyzing}
-                className="flex items-center gap-1.5 text-xs text-slate-400 transition hover:text-blue-300 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <Terminal size={13} /> Try a sample <ArrowUpRight size={12} />
-              </button>
             </div>
 
             <textarea
@@ -236,6 +230,12 @@ export default function Home() {
               </button>
             </div>
           </div>
+
+          <SampleCases
+            onSelect={handleSampleSelect}
+            disabled={isAnalyzing}
+            className="mt-5"
+          />
 
           <AnalysisPipeline status={status} className="mt-5" />
 
